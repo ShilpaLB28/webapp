@@ -1,112 +1,64 @@
-pipeline
-{
-
-agent {
-  label 'DevServer'
-}
-
-parameters {
-    choice choices: ['dev', 'prod'], name: 'select_environment'
-}
-
-environment{
-    NAME = "piyush"
-}
-tools {
-  maven 'mymaven'
-}
-
-stages{
-
-    stage('build')
-    {
-        steps {
-            script{
-                file = load "script.groovy"
-                file.hello()
-            }
-            sh 'mvn clean package -DskipTests=true'
-           
-        }
-
-        
-
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk21'
+        maven 'maven3'
     }
-
-    stage('test')
-    { 
-        parallel {
-            stage('testA')
-            {
-                agent { label 'DevServer' }
-                steps{
-                    echo " This is test A"
-                    sh "mvn test"
-                }
-                
+    parameters {
+      string(name: 'sonar_IP', defaultValue: '100.54.191.181', description: 'IP of sonarqube')
+      string(name: 'nexus_IP', defaultValue: '3.107.227.103', description: 'IP of nexus')
+    }
+    environment {
+      SONARQUBE_URL="http://${params.sonar_IP}:9000"
+      SONARQUBE_TOKEN=credentials('Sonar-token')
+      Nexus_URL="http://${params.nexus_IP}:8081"
+    }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'master',
+                url: 'https://github.com/ShilpaLB28/webapp.git'
             }
-            stage('testB')
-            {
-                agent { label 'DevServer' }
-                steps{
-                echo "this is test B"
-                sh "mvn test"
+        }
+        stage('Sonarqube Analysis') {
+            steps {
+                dir('webapp') {
+                    sh """
+                    mvn sonar:sonar \
+                    -Dsonar.projectKey=MavenProject \
+                    -Dsonar.host.url=$SONARQUBE_URL \
+                    -Dsonar.login=$SONARQUBE_TOKEN
+                    """
                 }
             }
         }
-        post {
-        success {
-             dir("webapp/target/")
-            {
-            stash name: "maven-build", includes: "*.war"
-                 }
-                 }
+        stage('Build') {
+            steps {
+                dir('webapp') {
+                sh 'mvn clean package -DskipTests'
+                }
             }
-
-    }
-
-    stage('deploy_dev')
-    {
-        when { expression {params.select_environment == 'dev'}
-        beforeAgent true}
-        agent { label 'DevServer' }
-        steps
-        {
-            dir("/var/www/html")
-            {
-                unstash "maven-build"
+        }
+        stage('Upload to Nexus') {
+            steps {
+                dir('webapp') {
+                    sh 'mvn clean deploy -DskipTests'
+                }
             }
-            sh """
-            cd /var/www/html/
-            jar -xvf webapp.war
-            """
+        }
+        stage('Deplo') {
+            steps {
+                sshagent(['ec2-key']) {
+                    sh '''
+                    ssh ubuntu@3.107.169.163 "
+                    wget $NEXUS_URL/repository/maven-releases/com/example/maven-project/webapp/1.0-SNAPSHOT/webapp.war
+                    sudo cp webapp.war ~/tomcat/webapps/
+                    ~/tomcat/bin/shutdown.sh
+                    ~/tomcat/bin/startup.sh
+                    "
+                    '''
+                }
+            }
         }
     }
-
-    stage('deploy_prod')
-    {
-      when { expression {params.select_environment == 'prod'}
-        beforeAgent true}
-        agent { label 'ProdServer' }
-        steps
-        {
-             timeout(time:5, unit:'DAYS'){
-                input message: 'Deployment approved?'
-             }
-            dir("/var/www/html")
-            {
-                unstash "maven-build"
-            }
-            sh """
-            cd /var/www/html/
-            jar -xvf webapp.war
-            """
-        }  
-    }
-
-   
-
-    
-}
-
 }
