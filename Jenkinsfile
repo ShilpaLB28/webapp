@@ -51,7 +51,7 @@ pipeline {
                 sshagent(['ec2-key']) {
                     sh '''
                     ssh ubuntu@3.107.169.163 "
-                    wget $NEXUS_URL/repository/maven-releases/com/example/maven-project/webapp/1.0-SNAPSHOT/webapp.war
+                    wget $NEXUS_URL/repository/maven-release/com/example/maven-project/webapp/1.0-SNAPSHOT/webapp.war
                     sudo cp webapp.war ~/tomcat/webapps/
                     ~/tomcat/bin/shutdown.sh
                     ~/tomcat/bin/startup.sh
