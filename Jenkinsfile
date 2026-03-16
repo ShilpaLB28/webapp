@@ -11,7 +11,10 @@ pipeline {
     environment {
       SONARQUBE_URL="http://${params.sonar_IP}:9000"
       SONARQUBE_TOKEN=credentials('Sonar-token')
-      Nexus_URL="http://${params.nexus_IP}:8081"
+      NEXUS_URL="http://${params.nexus_IP}:8081"
+      NEXUS_REPO='maven-releases'
+      APP_EC2_IP='3.107.169.163'
+      SSH_CRED_ID='ec2-ssh'
     }
     stages {
         stage('Checkout Code') {
@@ -41,22 +44,32 @@ pipeline {
         }
         stage('Upload to Nexus') {
             steps {
-                dir('webapp') {
-                    sh 'mvn clean deploy -DskipTests'
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-cred',
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASS'
+                )]) {
+                    dir('webapp') {
+                        sh """
+                        mvn deploy -DskipTests \
+                        -DaltDeploymentRepository=nexus::default::$NEXUS_URL/repository/${NEXUS_REPO}/ \
+                        -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
+                        """
+                    }
                 }
             }
         }
-        stage('Deplo') {
+        stage('Deploy') {
             steps {
                 sshagent(['ec2-key']) {
-                    sh '''
-                    ssh ubuntu@3.107.169.163 "
-                    wget $NEXUS_URL/repository/maven-release/com/example/maven-project/webapp/1.0-SNAPSHOT/webapp.war
-                    sudo cp webapp.war ~/tomcat/webapps/
-                    ~/tomcat/bin/shutdown.sh
-                    ~/tomcat/bin/startup.sh
-                    "
-                    '''
+                    sh """
+                    # Pull artifact from Nexus
+                    ssh -o StrictHostKeyChecking=no ec2-user@${APP_EC2_IP} '
+                      wget $NEXUS_URL/repository/${NEXUS_REPO}/com/example/maven-project/maven-project/1.0-SNAPSHOT/maven-project-1.0-SNAPSHOT.pom
+                      sudo mv /tmp/app.war /opt/tomcat/webapps/
+                      sudo systemctl restart tomcat
+                    '
+                    """
                 }
             }
         }
