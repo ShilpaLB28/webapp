@@ -65,7 +65,7 @@ pipeline {
                     sh """
                     # Pull artifact from Nexus
                     ssh -o StrictHostKeyChecking=no ec2-user@${APP_EC2_IP} '
-                      wget $NEXUS_URL/repository/${NEXUS_REPO}/com/example/maven-project/maven-project/1.0-SNAPSHOT/maven-project-1.0-SNAPSHOT.pom
+                      wget $NEXUS_URL/repository/${NEXUS_REPO}/com/example/maven-project/maven-project/1.0-SNAPSHOT/maven-project-1.0-SNAPSHOT.war
                       sudo mv /tmp/app.war /opt/tomcat/webapps/
                       sudo systemctl restart tomcat
                     '
