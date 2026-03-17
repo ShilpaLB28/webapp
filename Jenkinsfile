@@ -44,6 +44,8 @@ pipeline {
             steps {
                 dir('webapp') {
                     sh '''
+                    echo "NEXUS_URL=$NEXUS_URL"
+                    
                     mvn clean deploy -DskipTests \
                     -DaltDeploymentRepository=nexus-releases::${NEXUS_URL}/repository/maven-releases/
                     '''

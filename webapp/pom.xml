@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.example.maven-project</groupId>
     <artifactId>maven-project</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -14,6 +14,15 @@
   <packaging>war</packaging>
   <name>Webapp</name>
   <description>Webapp.</description>
+
+  <distributionManagement>
+
+    <repository>
+      <id>nexus-releases</id>
+      <url>http://3.107.227.103:8081/repository/maven-release/</url>
+    </repository>
+
+  </distributionManagement>
 
   <build>
     <finalName>${project.artifactId}</finalName>

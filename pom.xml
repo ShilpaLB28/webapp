@@ -6,7 +6,7 @@
   <groupId>com.example.maven-project</groupId>
   <artifactId>maven-project</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>Maven Project</name>
   <description>Sample Maven project with a working, deployable site.</description>
   <url>http://www.example.com</url>
@@ -25,7 +25,6 @@
 
     <repository>
       <id>nexus-releases</id>
-      <name>Nexus Release Repository</name>
       <url>http://3.107.227.103:8081/repository/maven-release/</url>
     </repository>
 
@@ -214,10 +213,10 @@
   </dependencyManagement>
 
   <scm>
-    <connection>scm:git:git@github.com:jleetutorial/maven-project.git</connection>
-    <developerConnection>scm:git:git@github.com:jleetutorial/maven-project.git</developerConnection>
+    <connection>scm:git:git@github.com:ShilpaLB28/webapp.git</connection>
+    <developerConnection>scm:git:git@github.com:ShilpaLB28/webapp.git</developerConnection>
     <tag>HEAD</tag>
-    <url>http://github.com/jleetutorial/maven-project</url>
+    <url>http://github.com/ShilpaLB28/webapp.git</url>
   </scm>
 
   <prerequisites>
