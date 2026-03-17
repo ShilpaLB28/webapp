@@ -25,12 +25,12 @@
 
     <repository>
       <id>nexus-releases</id>
-      <url>http://3.107.227.103:8081/nexus/content/repositories/maven-releases/</url>
+      <url>$NEXUS_URL/nexus/content/repositories/maven-releases/</url>
     </repository>
 
     <snapshotRepository>
       <id>nexus-snapshots</id>
-      <url>http://3.107.227.103:8081/nexus/content/repositories/maven-snapshots/</url>
+      <url>$NEXUS_URL/nexus/content/repositories/maven-snapshots/</url>
     </snapshotRepository>
 
     <site>
