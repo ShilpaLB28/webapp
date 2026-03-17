@@ -5,7 +5,7 @@ pipeline {
         maven 'maven3'
     }
     parameters {
-      string(name: 'sonar_IP', defaultValue: '100.54.191.181', description: 'IP of sonarqube')
+      string(name: 'sonar_IP', defaultValue: '52.62.89.26', description: 'IP of sonarqube')
       string(name: 'nexus_IP', defaultValue: '3.107.227.103', description: 'IP of nexus')
       string(name: 'deploy_IP', defaultValue:'3.107.169.163', description: 'IP of Deploy Server')  
     }
@@ -45,9 +45,9 @@ pipeline {
                 dir('webapp') {
                     sh '''
                     echo "NEXUS_URL=$NEXUS_URL"
-                    
+
                     mvn clean deploy -DskipTests \
-                    -DaltDeploymentRepository=nexus-releases::${NEXUS_URL}/repository/maven-releases/
+                    -DaltDeploymentRepository=nexus-releases::default::http://3.107.227.103:8081/repository/maven-releases/
                     '''
                 }
             }
