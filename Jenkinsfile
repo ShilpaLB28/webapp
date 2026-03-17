@@ -58,10 +58,10 @@ pipeline {
                     sh '''
                     scp -o StrictHostKeyChecking=no \
                         webapp/target/webapp.war \
-                        ubuntu@${params.deploy_IP}:/tmp/webapp.war
+                        ubuntu@${deploy_IP}:/tmp/webapp.war
 
-                    ssh -o StrictHostKeyChecking=no ubuntu@${params.deploy_IP} "
-                        sudo cp /tmp/webapp.war /var/lib/tomcat9/webapps/webapp.war &&
+                    ssh -o StrictHostKeyChecking=no ubuntu@${deploy_IP} "
+                        sudo cp /tmp/webapp.war /opt/tomcat/webapps &&
                         sudo systemctl restart tomcat9
                     "
                     '''
