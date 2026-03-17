@@ -44,10 +44,8 @@ pipeline {
             steps {
                 dir('webapp') {
                     sh '''
-                    echo "NEXUS_URL=$NEXUS_URL"
-
                     mvn clean deploy -DskipTests \
-                    -DaltDeploymentRepository=nexus-snapshots::default::http://3.107.227.103:8081/nexus/content/repositories/maven-snapshots/
+                    -DaltDeploymentRepository=nexus-snapshots::default::$NEXUS_URL/nexus/content/repositories/maven-snapshots/
                     '''
                 }
             }
