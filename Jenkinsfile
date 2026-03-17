@@ -60,11 +60,11 @@ pipeline {
                         webapp/target/webapp.war \
                         ubuntu@${deploy_IP}:/tmp/webapp.war
 
-                    ssh -o StrictHostKeyChecking=no ubuntu@${deploy_IP} << EOF
+                    ssh -o StrictHostKeyChecking=no ubuntu@${deploy_IP} "
                         sudo cp /tmp/webapp.war /home/ubuntu/tomcat/webapps/webapp.war &&
                         /home/ubuntu/tomcat/bin/shutdown.sh
                         /home/ubuntu/tomcat/bin/startup.sh
-                    EOF
+                    "
                     '''
                 }
             }
