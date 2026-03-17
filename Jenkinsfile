@@ -54,7 +54,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sshagent(credentials:['ec2-key']) {
+                sshagent(credentials:['ec2-ssh']) {
                     sh '''
                     scp -o StrictHostKeyChecking=no \
                         webapp/target/webapp.war \
