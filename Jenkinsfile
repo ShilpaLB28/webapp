@@ -11,10 +11,7 @@ pipeline {
     environment {
       SONARQUBE_URL="http://${params.sonar_IP}:9000"
       SONARQUBE_TOKEN=credentials('Sonar-token')
-      NEXUS_URL="http://${params.nexus_IP}:8081"
-      NEXUS_REPO='maven-releases'
-      APP_EC2_IP='3.107.169.163'
-      SSH_CRED_ID='ec2-ssh'
+      Nexus_URL="http://${params.nexus_ip}:8081"
     }
     stages {
         stage('Checkout Code') {
@@ -44,32 +41,21 @@ pipeline {
         }
         stage('Upload to Nexus') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'nexus-cred',
-                    usernameVariable: 'NEXUS_USER',
-                    passwordVariable: 'NEXUS_PASS'
-                )]) {
-                    dir('webapp') {
-                        sh """
-                        mvn deploy -DskipTests \
-                        -DaltDeploymentRepository=nexus::default::$NEXUS_URL/repository/${NEXUS_REPO}/ \
-                        -Dnexus.username=$NEXUS_USER -Dnexus.password=$NEXUS_PASS
-                        """
-                    }
+                dir('webapp') {
+                    sh 'mvn clean deploy -DskipTests'
                 }
             }
         }
         stage('Deploy') {
             steps {
                 sshagent(['ec2-key']) {
-                    sh """
-                    # Pull artifact from Nexus
-                    ssh -o StrictHostKeyChecking=no ec2-user@${APP_EC2_IP} '
-                      wget $NEXUS_URL/repository/${NEXUS_REPO}/com/example/maven-project/maven-project/1.0-SNAPSHOT/maven-project-1.0-SNAPSHOT.war
-                      sudo mv /tmp/app.war /opt/tomcat/webapps/
-                      sudo systemctl restart tomcat
-                    '
-                    """
+                    sh '''
+                    ssh ubuntu@3.107.169.163 "
+                    wget http://${params.nexus_ip}:8081/repository/maven-release/com/example/maven-project/1.0/maven-project-1.0.war
+                    sudo cp maven-project-1.0.war /var/lib/tomcat9/webapps/
+                    sudo systemctl restart tomcat9
+                    "
+                    '''
                 }
             }
         }
