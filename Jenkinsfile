@@ -47,7 +47,7 @@ pipeline {
                     echo "NEXUS_URL=$NEXUS_URL"
 
                     mvn clean deploy -DskipTests \
-                    -DaltDeploymentRepository=nexus-releases::default::http://3.107.227.103:8081/repository/maven-releases/
+                    -DaltDeploymentRepository=nexus-releases::default::http://3.107.227.103:8081/nexus/content/repositories/maven-releases/
                     '''
                 }
             }
