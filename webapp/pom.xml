@@ -22,10 +22,10 @@
       <url>http://3.107.227.103:8081/nexus/content/repositories/maven-releases/</url>
     </repository>
 
-     <snapshotRepository>
+    <snapshotRepository>
       <id>nexus-snapshots</id>
       <url>http://3.107.227.103:8081/nexus/content/repositories/maven-snapshots/</url>
-    </repository>
+    </snapshotRepository>
 
 
   </distributionManagement>
