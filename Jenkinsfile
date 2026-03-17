@@ -7,11 +7,12 @@ pipeline {
     parameters {
       string(name: 'sonar_IP', defaultValue: '100.54.191.181', description: 'IP of sonarqube')
       string(name: 'nexus_IP', defaultValue: '3.107.227.103', description: 'IP of nexus')
+      string(name: 'deploy_IP', defaultValue:'3.107.169.163 ', description: 'IP of Deploy Server')  
     }
     environment {
       SONARQUBE_URL="http://${params.sonar_IP}:9000"
       SONARQUBE_TOKEN=credentials('Sonar-token')
-      Nexus_URL="http://${params.nexus_ip}:8081"
+      NEXUS_URL="http://${params.nexus_ip}:8081/repository/maven-releases/"
     }
     stages {
         stage('Checkout Code') {
@@ -42,18 +43,24 @@ pipeline {
         stage('Upload to Nexus') {
             steps {
                 dir('webapp') {
-                    sh 'mvn clean deploy -DskipTests'
+                    sh '''
+                    mvn clean deploy -DskipTests \
+                    -DaltDeploymentRepository=nexus-releases::default::${NEXUS_URL}
+                    '''
                 }
             }
         }
         stage('Deploy') {
             steps {
-                sshagent(['ec2-key']) {
+                sshagent(credentials:['ec2-key']) {
                     sh '''
-                    ssh ubuntu@3.107.169.163 "
-                    wget http://${params.nexus_ip}:8081/repository/maven-release/com/example/maven-project/1.0/maven-project-1.0.war
-                    sudo cp maven-project-1.0.war /var/lib/tomcat9/webapps/
-                    sudo systemctl restart tomcat9
+                    scp -o StrictHostKeyChecking=no \
+                        webapp/target/webapp.war \
+                        ubuntu@${params.deploy_IP}:/tmp/webapp.war
+                        
+                    ssh -o StrictHostKeyChecking=no ubuntu@${params.deploy_IP} "
+                        sudo cp /tmp/webapp.war /var/lib/tomcat9/webapps/webapp.war &&
+                        sudo systemctl restart tomcat9
                     "
                     '''
                 }
