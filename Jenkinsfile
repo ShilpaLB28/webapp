@@ -61,8 +61,8 @@ pipeline {
                         ubuntu@${deploy_IP}:/tmp/webapp.war
 
                     ssh -o StrictHostKeyChecking=no ubuntu@${deploy_IP} "
-                        sudo cp /tmp/webapp.war /opt/tomcat/webapps &&
-                        sudo systemctl restart tomcat9
+                        sudo cp /tmp/webapp.war /var/lib/tomcat/webapps/webapp.war &&
+                        sudo systemctl restart tomcat
                     "
                     '''
                 }
